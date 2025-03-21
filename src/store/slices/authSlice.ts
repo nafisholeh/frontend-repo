@@ -3,13 +3,28 @@ import { auth } from '@/config/firebase';
 import { 
   signInWithEmailAndPassword, 
   signOut as firebaseSignOut,
-  User as FirebaseUser,
   AuthError
 } from 'firebase/auth';
+import { serializeUser } from '@/utils/auth';
+
+// Define a serialized user type
+interface SerializedUser {
+  uid: string;
+  email: string | null;
+  emailVerified: boolean;
+  displayName: string | null;
+  photoURL: string | null;
+  phoneNumber: string | null;
+  isAnonymous: boolean;
+  metadata: {
+    creationTime: string | undefined;
+    lastSignInTime: string | undefined;
+  };
+}
 
 // Define the authentication state interface
 interface AuthState {
-  user: FirebaseUser | null;
+  user: SerializedUser | null;
   loading: boolean;
   error: string | null;
 }
@@ -32,7 +47,8 @@ export const loginUser = createAsyncThunk(
       }
       
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      // Serialize the user before returning
+      return serializeUser(userCredential.user);
     } catch (error) {
       const authError = error as AuthError;
       return rejectWithValue(authError.message || 'Login failed');
@@ -65,7 +81,8 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      state.user = action.payload;
+      // Use serializeUser to ensure we only store serializable values
+      state.user = serializeUser(action.payload);
     },
     clearError: (state) => {
       state.error = null;

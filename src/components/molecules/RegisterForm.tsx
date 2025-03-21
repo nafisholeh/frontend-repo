@@ -102,7 +102,7 @@ export default function RegisterForm() {
         displayName: data.name
       });
       
-      // Update redux store
+      // Update redux store with serialized user
       dispatch(setUser(userCredential.user));
       
       // Redirect to dashboard
