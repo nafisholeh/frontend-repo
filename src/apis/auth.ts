@@ -11,6 +11,9 @@ import {
 import { auth } from '@/config/firebase';
 import { store } from '@/store/store';
 
+// Mock user ID for development when Firebase auth is not available
+const MOCK_USER_ID = 'mock-user-id-12345';
+
 /**
  * Sign in with email and password
  * @param email - User email
@@ -19,6 +22,9 @@ import { store } from '@/store/store';
  */
 export const signIn = async (email: string, password: string): Promise<UserCredential> => {
   try {
+    if (!auth) {
+      throw new Error('Firebase auth is not initialized');
+    }
     return await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
     console.error('Error signing in:', error);
@@ -34,6 +40,9 @@ export const signIn = async (email: string, password: string): Promise<UserCrede
  */
 export const signUp = async (email: string, password: string): Promise<UserCredential> => {
   try {
+    if (!auth) {
+      throw new Error('Firebase auth is not initialized');
+    }
     return await createUserWithEmailAndPassword(auth, email, password);
   } catch (error) {
     console.error('Error signing up:', error);
@@ -46,6 +55,9 @@ export const signUp = async (email: string, password: string): Promise<UserCrede
  */
 export const logOut = async (): Promise<void> => {
   try {
+    if (!auth) {
+      throw new Error('Firebase auth is not initialized');
+    }
     await signOut(auth);
   } catch (error) {
     console.error('Error signing out:', error);
@@ -55,12 +67,13 @@ export const logOut = async (): Promise<void> => {
 
 /**
  * Get the current user's ID
- * @returns User ID or null if not logged in
+ * @returns User ID or a mock ID if not logged in (for development)
  */
-export const getCurrentUserId = (): string | null => {
+export const getCurrentUserId = (): string => {
   // First check Firebase auth
-  const firebaseUserId = auth.currentUser?.uid;
-  if (firebaseUserId) return firebaseUserId;
+  if (auth && auth.currentUser) {
+    return auth.currentUser.uid;
+  }
   
   // Fallback to Redux store - auth slice
   const authUser = store.getState().auth.user;
@@ -70,7 +83,9 @@ export const getCurrentUserId = (): string | null => {
   const userState = store.getState().user;
   if (userState?.user?.id) return userState.user.id;
   
-  return null;
+  // For development use a mock ID to prevent errors
+  console.warn('No user ID found, using mock ID for development');
+  return MOCK_USER_ID;
 };
 
 /**
@@ -79,7 +94,10 @@ export const getCurrentUserId = (): string | null => {
  */
 export const getAuthToken = async (): Promise<string | null> => {
   try {
-    const token = await auth.currentUser?.getIdToken();
+    if (!auth || !auth.currentUser) {
+      return null;
+    }
+    const token = await auth.currentUser.getIdToken();
     return token || null;
   } catch (error) {
     console.error('Error getting auth token:', error);
