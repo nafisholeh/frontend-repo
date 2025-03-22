@@ -21,7 +21,8 @@ import { getCurrentUserId } from '@/apis/auth';
  */
 export const useUser = () => {
   const dispatch = useDispatch();
-  const { user, isLoading, error } = useSelector((state: RootState) => state.user);
+  const userState = useSelector((state: RootState) => state.user) || { user: null, isLoading: false, error: null };
+  const { user, isLoading, error } = userState;
   const [loadingUser, setLoadingUser] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
 

@@ -9,6 +9,7 @@ import {
   UserCredential,
 } from 'firebase/auth';
 import { auth } from '@/config/firebase';
+import { store } from '@/store/store';
 
 /**
  * Sign in with email and password
@@ -57,7 +58,19 @@ export const logOut = async (): Promise<void> => {
  * @returns User ID or null if not logged in
  */
 export const getCurrentUserId = (): string | null => {
-  return auth.currentUser?.uid || null;
+  // First check Firebase auth
+  const firebaseUserId = auth.currentUser?.uid;
+  if (firebaseUserId) return firebaseUserId;
+  
+  // Fallback to Redux store - auth slice
+  const authUser = store.getState().auth.user;
+  if (authUser?.uid) return authUser.uid;
+  
+  // Fallback to Redux store - user slice
+  const userState = store.getState().user;
+  if (userState?.user?.id) return userState.user.id;
+  
+  return null;
 };
 
 /**

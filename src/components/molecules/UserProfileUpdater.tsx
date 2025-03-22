@@ -34,8 +34,8 @@ export default function UserProfileUpdater() {
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name,
-        email: user.email
+        name: user.name || '',
+        email: user.email || ''
       });
     }
   }, [user]);
@@ -52,6 +52,8 @@ export default function UserProfileUpdater() {
   // Handle form submission for updating user
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return; // Don't submit if no user is available
+    
     setUpdateSuccess(false);
     setUpdateLoading(true);
     
@@ -92,7 +94,7 @@ export default function UserProfileUpdater() {
             color="primary"
             startIcon={<RefreshIcon />}
             onClick={handleFetchUser}
-            disabled={fetchLoading}
+            disabled={fetchLoading || isLoading}
           >
             {fetchLoading ? (
               <>
