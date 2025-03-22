@@ -2,9 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Typography, Container, Grid, Card, CardContent, CardHeader, Box } from '@mui/material';
+import { Typography, Container, Grid, Card, CardContent, CardHeader, Box, Divider } from '@mui/material';
 import PageLayout from '@/components/organisms/PageLayout';
 import { useAppSelector } from '@/hooks/storeHooks';
+import UserProfileUpdater from '@/components/molecules/UserProfileUpdater';
 
 export default function DashboardPage() {
   const { user } = useAppSelector((state) => state.auth);
@@ -32,6 +33,15 @@ export default function DashboardPage() {
         <Typography variant="body1" color="text.secondary" paragraph>
           Welcome back, {user.displayName || 'User'}! Here&apos;s an overview of your account.
         </Typography>
+        
+        {/* API Integration Section with UserProfileUpdater */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+            User Profile Management
+          </Typography>
+          <UserProfileUpdater />
+          <Divider sx={{ my: 4 }} />
+        </Box>
         
         <Grid container spacing={3} sx={{ mt: 2 }}>
           {/* User Profile Card */}
